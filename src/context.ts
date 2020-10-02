@@ -30,6 +30,7 @@ export interface Inputs {
   cacheTo: string[];
   secrets: string[];
   githubToken: string;
+  ssh: boolean;
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -51,7 +52,8 @@ export async function getInputs(): Promise<Inputs> {
     cacheFrom: await getInputList('cache-from', true),
     cacheTo: await getInputList('cache-to', true),
     secrets: await getInputList('secrets', true),
-    githubToken: core.getInput('github-token')
+    githubToken: core.getInput('github-token'),
+    ssh: /true/i.test(core.getInput('ssh')),
   };
 }
 
@@ -127,6 +129,9 @@ async function getCommonArgs(inputs: Inputs): Promise<Array<string>> {
   }
   if (inputs.push) {
     args.push('--push');
+  }
+  if (inputs.ssh) {
+    args.push('--ssh', 'default')
   }
   return args;
 }
