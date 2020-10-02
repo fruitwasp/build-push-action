@@ -28,6 +28,7 @@ export interface Inputs {
   cacheTo: string[];
   secrets: string[];
   githubToken: string;
+  ssh: boolean;
 }
 
 export async function getInputs(): Promise<Inputs> {
@@ -49,7 +50,8 @@ export async function getInputs(): Promise<Inputs> {
     cacheFrom: await getInputList('cache-from', true),
     cacheTo: await getInputList('cache-to', true),
     secrets: await getInputList('secrets', true),
-    githubToken: core.getInput('github-token')
+    githubToken: core.getInput('github-token'),
+    ssh: /true/i.test(core.getInput('ssh')),
   };
 }
 
@@ -57,6 +59,7 @@ export async function getArgs(inputs: Inputs, buildxVersion: string): Promise<Ar
   let args: Array<string> = ['buildx'];
   args.push.apply(args, await getBuildArgs(inputs, buildxVersion));
   args.push.apply(args, await getCommonArgs(inputs));
+  args.push('--ssh');
   args.push(inputs.context);
   return args;
 }
@@ -105,6 +108,9 @@ async function getBuildArgs(inputs: Inputs, buildxVersion: string): Promise<Arra
   }
   if (inputs.file) {
     args.push('--file', inputs.file);
+  }
+  if (inputs.ssh) {
+    args.push('--ssh')
   }
   return args;
 }
